@@ -1,0 +1,47 @@
+       #设置一个iconComboBox
+        self.iconComboBox = QComboBox()
+        self.iconComboBox.addItem(QIcon('image/favicon.ico'), "Dmyz")
+        #-------------------通知区域图标右键菜单start------------------
+        self.minimizeAction = QAction(u"最小化", self,triggered=self.hide)
+        self.restoreAction = QAction(u"显示窗口", self,triggered=self.showNormal)
+        self.quitAction = QAction(u"退出", self,triggered=qApp.quit)
+        #弹出的菜单的行为，包括退出，还原，最小化
+        self.trayIconMenu = QMenu(self)
+        self.trayIconMenu.addAction(self.restoreAction)
+        self.trayIconMenu.addAction(self.minimizeAction)
+        self.trayIconMenu.addAction(self.quitAction)
+        self.trayIcon = QSystemTrayIcon(self)
+        self.trayIcon.setContextMenu(self.trayIconMenu)
+        #-------------------通知区域图标右键菜单end------------------
+        #设置通知区域的ICON
+        self.iconComboBox.currentIndexChanged.connect(self.setIcon)
+        #通知区域icon显示
+        self.iconComboBox.setCurrentIndex(1)
+        self.trayIcon.show()
+        self.trayIcon.activated.connect(self.iconActivated)
+
+
+    def iconActivated(self, reason):
+        if reason in (QSystemTrayIcon.Trigger,QSystemTrayIcon.DoubleClick):
+            self.showNormal()
+        elif reason == QSystemTrayIcon.MiddleClick:
+            self.showMessage()
+ 
+    def setIcon(self, index):
+        icon = self.iconComboBox.itemIcon(0)
+        self.trayIcon.setIcon(icon)
+        self.setWindowIcon(icon)
+        self.trayIcon.setToolTip(self.iconComboBox.itemText(index))
+ 
+    def showMessage(self):
+        #这里是可以设置弹出对话气泡的icon的，作为实验就省略了
+        icon = QSystemTrayIcon.MessageIcon()
+        self.trayIcon.showMessage(u'提示',u'您有新的任务，请注意查收', icon,1000)
+ 
+    def getTasksNum(self):
+        if taskNum != 0:
+            self.showMessage()
+ 
+        global t
+        t = threading.Timer(30.0, self.getTasksNum)
+        t.start()
